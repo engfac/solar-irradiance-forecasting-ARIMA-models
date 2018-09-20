@@ -1,0 +1,183 @@
+import matplotlib
+import pylab
+import matplotlib.pyplot as plt
+import matplotlib.dates as md
+import datetime
+import seaborn as sns
+from scipy.stats import pearsonr
+from matplotlib import cm as cm
+import calendar
+import warnings
+import itertools
+from statsmodels.tsa.stattools import adfuller
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+import statsmodels.tsa.api as smt
+from sklearn.metrics import mean_squared_error
+import pandas as pd
+import seaborn as sb
+import itertools
+import numpy as np
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.arima_model import ARIMA
+from numpy import loadtxt
+import os 
+import json
+import numpy as np
+import pandas as pd
+from sklearn.externals import joblib
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.pipeline import make_pipeline
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style('whitegrid')
+
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.externals import joblib
+
+import warnings
+warnings.filterwarnings("ignore")
+
+
+y = 2016
+new_data = pd.DataFrame()
+sample_times = []
+
+for y in range(2014,2016,1):
+   print (y)
+   for m in range(1,13,1):
+       no_of_days = calendar.monthrange(2014,m)[1]
+
+       for d in range (1,no_of_days+1,1):
+##        for d in range (1,2,1):
+
+      #      data = pd.read_csv("C:\\Users\\ahilan\\Dropbox\\Research\\Solar Forecast\\Solar Asia 2018\\Data\\Year %d\\D120318_%d%02d%02d_0000.csv"%(y,y,m, d));
+           data = pd.read_csv("F:\edit\Data\data\Predicting\\D120318_%d%02d%02d_0000.csv"%(y,m,d));
+           pd
+           
+           if (pd.to_datetime(data['Date/time'][2]) -pd.to_datetime(data['Date/time'][1])).seconds ==600:
+               new_data_temp = data[['Date/time','Anemometer;wind_speed;Avg','Wind Vane;wind_direction;Avg','Hygro/Thermo;humidity;Avg', 'Hygro/Thermo;temperature;Avg','Barometer;air_pressure;Avg','Pyranometer-Diffused;solar_irradiance;Avg', 'Pyranometer-Global;solar_irradiance;Avg', 'Silicon;voltage;Avg']][0:144].copy()
+               new_data = new_data.append(new_data_temp)
+
+               for i in range(len(new_data_temp)):
+                   sample_times.append(datetime.datetime(y, m, d, 6, 00, 0)+ i*datetime.timedelta(minutes=10))
+       
+           elif (pd.to_datetime(data['Date/time'][2]) -pd.to_datetime(data['Date/time'][1])).seconds ==60:
+               new_data_temp = data[['Date/time','Anemometer;wind_speed;Avg','Wind Vane;wind_direction;Avg','Hygro/Thermo;humidity;Avg', 'Hygro/Thermo;temperature;Avg','Barometer;air_pressure;Avg','Pyranometer-Diffused;solar_irradiance;Avg', 'Pyranometer-Global;solar_irradiance;Avg', 'Silicon;voltage;Avg']][0:1440].copy()
+               new_data = new_data.append(new_data_temp)
+
+               for i in range(len(new_data_temp)):
+                   sample_times.append(datetime.datetime(y, m, d, 6, 00, 0)+ i*datetime.timedelta(minutes=1))
+
+new_data.columns=['time','wind_speed','wind_dir','humidity','temperature','pressure','dhi','ghi','voltage']
+sample_times_series = pd.Series(sample_times)
+new_data['time'] = sample_times_series.values
+new_data = new_data.reset_index().set_index('time').resample('10min').mean()
+
+new_data.plot()
+plt.show()
+new_data.dhi.plot()
+plt.show()
+new_data.humidity.plot()
+plt.show()
+new_data.wind_speed.plot()
+plt.show()
+new_data.wind_dir.plot()
+plt.show()
+new_data.temperature.plot()
+plt.show()
+new_data.pressure.plot()
+plt.show()
+
+
+white_noise = np.random.normal(size=1000)
+
+with plt.style.context('bmh'):  
+ plt.figure(figsize=(15, 5))
+ plt.plot(white_noise)
+    
+def plotProcess(n_samples=1000, rho=0):
+
+    x = w = np.random.normal(size=n_samples)
+
+    for t in range(n_samples):
+
+        x[t] = rho * x[t-1] + w[t]
+ with plt.style.context('bmh'):  
+ plt.figure(figsize=(10, 3))
+ plt.plot(x)
+ plt.title("Rho {}\n Dickey-Fuller p-value: {}".format(rho, round(sm.tsa.stattools.adfuller(x)[1], 3)))
+
+ for rho in [0, 0.6, 0.9, 1]:
+  plotProcess(rho=rho) 
+ 
+ def tsplot(y, lags=None, figsize=(12, 7), style='bmh'):
+
+    """
+
+        Plot time series, its ACF and PACF, calculate Dickey–Fuller test
+
+        
+
+        y - timeseries
+
+        lags - how many lags to include in ACF, PACF calculation
+
+    """
+
+    if not isinstance(y, pd.Series):
+
+        y = pd.Series(y)
+
+        
+
+    with plt.style.context(style):    
+
+        fig = plt.figure(figsize=figsize)
+
+        layout = (2, 2)
+
+        ts_ax = plt.subplot2grid(layout, (0, 0), colspan=2)
+
+        acf_ax = plt.subplot2grid(layout, (1, 0))
+
+        pacf_ax = plt.subplot2grid(layout, (1, 1))
+
+        
+
+        y.plot(ax=ts_ax)
+
+        p_value = sm.tsa.stattools.adfuller(y)[1]
+
+        ts_ax.set_title('Time Series Analysis Plots\n Dickey-Fuller: p={0:.5f}'.format(p_value))
+
+        smt.graphics.plot_acf(y, lags=lags, ax=acf_ax)
+
+        smt.graphics.plot_pacf(y, lags=lags, ax=pacf_ax)
+
+        plt.tight_layout()
+
+tsplot(new_data.dhi, lags=60)
+ads_diff = new_data.dhi - new_data.dhi.shift(24)
+tsplot(ads_diff[144:], lags=60)
+
+ads_diff = ads_diff - ads_diff.shift(1)
+
+tsplot(ads_diff[144+1:], lags=60)
+
+tsplot(ads_diff[144+1:], lags=60)
+
+decomposition = seasonal_decompose(new_data.dhi, freq=144)  
+fig = plt.figure()  
+fig = decomposition.plot()  
+fig.set_size_inches(15, 8)
+plt.show()
+
+
+    
