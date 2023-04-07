@@ -1,46 +1,16 @@
-import matplotlib
-import pylab
 import matplotlib.pyplot as plt
-import matplotlib.dates as md
-import datetime
-import seaborn as sns
-from scipy.stats import pearsonr
-from matplotlib import cm as cm
 import calendar
-import warnings
-import itertools
 from statsmodels.tsa.stattools import adfuller
-import statsmodels.formula.api as smf
 import statsmodels.api as sm
-import statsmodels.tsa.api as smt
 from sklearn.metrics import mean_squared_error
 import pandas as pd
-import seaborn as sb
-import itertools
 import numpy as np
-from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.arima_model import ARIMA
-from numpy import loadtxt
 import os 
-import json
-import numpy as np
-import pandas as pd
-from sklearn.externals import joblib
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.ensemble import RandomForestClassifier
+import math
 
-from sklearn.pipeline import make_pipeline
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, GridSearchCV
 import seaborn as sns
 sns.set_style('whitegrid')
-
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.externals import joblib
-
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -55,20 +25,18 @@ for y in range(2014,2016,1):
        no_of_days = calendar.monthrange(2014,m)[1]
 
        for d in range (1,no_of_days+1,1):
-
-           data = pd.read_csv("C:\\Users\\WATHMINI SHARI\\Desktop\\Semester 8\\Research_sem8\\Data\\D120318_%d%02d%02d_0000.csv"%(y,m,d));
-           pd
+           data = pd.read_csv("C:\\Users\\USER\\OneDrive - University of Jaffna\\AhilanDoc\\Research\\github\\solar-forecasting-using-time-series\\data\\D120318_%d%02d%02d_0000.csv"%(y,m,d));
            
            if (pd.to_datetime(data['Date/time'][2]) -pd.to_datetime(data['Date/time'][1])).seconds ==600:
                new_data_temp = data[['Date/time','Anemometer;wind_speed;Avg','Wind Vane;wind_direction;Avg','Hygro/Thermo;humidity;Avg', 'Hygro/Thermo;temperature;Avg','Barometer;air_pressure;Avg','Pyranometer-Diffused;solar_irradiance;Avg', 'Pyranometer-Global;solar_irradiance;Avg', 'Silicon;voltage;Avg']][0:144].copy()
-               new_data = new_data.append(new_data_temp)
+               new_data = pd.concat([new_data,new_data_temp])
 
                for i in range(len(new_data_temp)):
                    sample_times.append(datetime.datetime(y, m, d, 6, 00, 0)+ i*datetime.timedelta(minutes=10))
        
            elif (pd.to_datetime(data['Date/time'][2]) -pd.to_datetime(data['Date/time'][1])).seconds ==60:
                new_data_temp = data[['Date/time','Anemometer;wind_speed;Avg','Wind Vane;wind_direction;Avg','Hygro/Thermo;humidity;Avg', 'Hygro/Thermo;temperature;Avg','Barometer;air_pressure;Avg','Pyranometer-Diffused;solar_irradiance;Avg', 'Pyranometer-Global;solar_irradiance;Avg', 'Silicon;voltage;Avg']][0:1440].copy()
-               new_data = new_data.append(new_data_temp)
+               new_data = pd.concat([new_data,new_data_temp])
 
                for i in range(len(new_data_temp)):
                    sample_times.append(datetime.datetime(y, m, d, 6, 00, 0)+ i*datetime.timedelta(minutes=1))
@@ -78,9 +46,6 @@ sample_times_series = pd.Series(sample_times)
 new_data['time'] = sample_times_series.values
 
 new_data = new_data.reset_index().set_index('time').resample('10min').mean()
-import numpy as np
-import pandas as pd 
-import pytz
 solar_irra= new_data.dhi.values
 
 size = int(len(solar_irra) * 0.75)
@@ -90,18 +55,18 @@ test= np.nan_to_num(test)
 history = [x for x in train]
 predictions = list()
 for t in range(len(test)):
-    model = ARIMA(history, order=(2,1,0))
-    model_fit = model.fit(disp=0)
+    model = sm.tsa.arima.ARIMA(history, order=(2,1,0))
+    model_fit = model.fit()
     output = model_fit.forecast()
     yhat = output[0]
-    predictions.append(yhat[0])
+    predictions.append(yhat)
     obs = test[t]
     history.append(obs)
     print('predicted=%f, expected=%f' % (yhat, obs))
 
 pred = np.array(predictions)
 
-import math
+
 error = math.sqrt(mean_squared_error(test, predictions))
 print('Test RMSE: %.3f' % error)
 
@@ -111,7 +76,4 @@ plt.plot(test,color='red',label='Actual')
 plt.legend()
 plt.xlabel('index')
 plt.ylabel('Solar irradiance')
-
 plt.show()
-
-

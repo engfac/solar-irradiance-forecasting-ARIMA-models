@@ -1,0 +1,25 @@
+#vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+#local History for Visual Studio code
+.history/
+
+#Common credential files
+**/credentials.json
+**/client_secrets.json
+**/client_secret.json
+
+# Dataset
+Arima/D1_data.csv
+Arima/H1_data.csv
+Arima/sample.csv
+
+GradientBoost/D_data.csv
+GradientBoost/H_data.csv
+
+data/
