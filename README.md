@@ -1,4 +1,6 @@
 # solar-forecasting-using-time-series
+The need to forecast solar irradiation at a specific location over long-time horizons has acquired immense importance. ARIMA model is used to predict solar irradiation at 10 min interval for month ahead time horizon using dataset from Killinochchi district, Faculty of Engineering, University of Jaffna Measuring Centre. 
+
 Data was collected from Solar measuring station, Faculty of Engineering, University of Jaffna. If you need data, please contact Dr. K. Ahilan, ahilan.eng@gmail.com
 
 The details of data logger is given below,
